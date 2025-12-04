@@ -1,3 +1,9 @@
+body {
+    color: white;
+    background-color: black;
+
+}
+
 .phone-group{
     display: flex;
     flex-flow: nowrap, row;
@@ -7,4 +13,33 @@
     display: flex;
     flex-direction: column;
 
+}
+
+.roulette-container {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    position: relative;
+    border: 2px solid #333;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.roulette {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: conic-gradient(
+        #ff0000 0% 10%,
+        #00ff00 10% 20%,
+        #0000ff 20% 30%,
+        #ffff00 30% 40%,
+        #ff00ff 40% 50%,
+        #00ffff 50% 60%,
+        #ff0000 60% 70%,
+        #00ff00 70% 80%,
+        #0000ff 80% 90%,
+        #ffff00 90% 100%
+    );
+    transition: transform 2s ease-out;
 }

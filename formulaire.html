@@ -28,11 +28,33 @@
 
                     document.getElementById(idInput).value = format;
                 }
+
+                function lancerRoulette() {
+                    const roulette = document.getElementById('roulette');
+                    const case1 = document.getElementById('case1');
+
+                    // Génère un nombre aléatoire entre 0 et 99
+                    let nombre = Math.floor(Math.random() * 100);
+                    let format = nombre.toString().padStart(2, "0");
+
+                    // Animation de la roulette
+                    roulette.style.transform = 'rotate(1440deg)'; // 4 tours complets
+
+                    // Après l'animation, on affiche le nombre
+                    setTimeout(() => {
+                        case1.value = format;
+                        roulette.style.transform = 'rotate(0deg)';
+                    }, 2000); // 2 secondes = durée de l'animation
+                }
             </script>
 
             <div class="bouton_roue">
+                <div class="roulette-container">
+                    <div class="roulette" id="roulette"></div>
+                </div>
+                
                 <input type="text" maxlength="2" pattern="^0[0-9]" required id="case1" onkeydown="return false;">
-                <button type="button" onclick="genererNombre('case1')">Tourner !</button>
+                <button type="button" onclick="lancerRoulette()">Tourner !</button>
             </div>
 
             <div class="bouton_roue">
