@@ -1,0 +1,10 @@
+.phone-group{
+    display: flex;
+    flex-flow: nowrap, row;
+}
+
+.bouton_roue{
+    display: flex;
+    flex-direction: column;
+
+}
