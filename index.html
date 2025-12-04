@@ -42,7 +42,7 @@
 
 <hr style="color: white;">
 <footer style="color:white">
-    <p>
+    <p id="footer-text">
         WORDLE DU 12/4/2025 - TULIP<br>
         PEDANTIX DU 12/4/2025 - Thérèse d'Avila<br>
         TUEUR DE JFK - GILDAS<br>
@@ -110,6 +110,27 @@
 
 <!--///////////////////////////////////////////////////////////////////////////////////////////////////-->
     <script>
+        const footer = document.getElementById('footer-text');
+        const fullHTML = footer.innerHTML; // grab HTML with <br>
+        footer.innerHTML = ''; // clear it
+
+        async function typeHTML(html, delay = 30) {
+        let i = 0;
+        while (i < html.length) {
+            if (html[i] === '<') {
+            // Detect and append the whole tag at once
+            let tagEnd = html.indexOf('>', i);
+            footer.innerHTML += html.slice(i, tagEnd + 1);
+            i = tagEnd + 1;
+            } else {
+            footer.innerHTML += html[i];
+            i++;
+            }
+            await new Promise(r => setTimeout(r, delay));
+        }
+        }
+
+        typeHTML(fullHTML);
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const audioFile = document.getElementById('audioFile');
