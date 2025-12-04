@@ -1,12 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Visualizer</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            background: #111;
+            display: block;
+        }
+
+        input, button {
+            margin: 20px 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
 <body>
+    <canvas id="canvas" width="800" height="400"></canvas>
+    <div>
+        <input type="file" id="audioFile" accept="audio/*">
+        <button id="playBtn">Play</button>
+    </div>
 
-<div id="waveform"></div>
-<div id="visualizer"></div>
-<button id="playBtn">Play</button>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const audioFile = document.getElementById('audioFile');
+        const playBtn = document.getElementById('playBtn');
 
-<script type="module" src="app.js"></script>
+        let audio = new Audio();
+        let audioContext, analyser, source, dataArray;
 
+        audioFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            audio.src = URL.createObjectURL(file);
+            
+            audioContext = new AudioContext();
+            analyser = audioContext.createAnalyser();
+            source = audioContext.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            
+            analyser.fftSize = 256;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+        });
+
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                visualize();
+            } else {
+                audio.pause();
+            }
+        });
+
+        function visualize() {
+            requestAnimationFrame(visualize);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = canvas.width / dataArray.length * 2;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                const barHeight = dataArray[i] * 1.5;
+                ctx.fillStyle = `rgb(${dataArray[i] + 100}, 50, 200)`;
+                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                x += barWidth + 1;
+            }
+        }
+    </script>
 </body>
 </html>
