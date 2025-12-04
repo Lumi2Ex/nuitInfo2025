@@ -6,8 +6,8 @@ const surfer = WaveSurfer.create({
   progressColor: "purple",
 });
 
-// Load any audio URL
-surfer.load("/resources/whistle.mp3");
+// MUST be a correct path
+surfer.load("./resources/whistle.mp3");
 
 document.getElementById("playBtn").onclick = () => {
   surfer.playPause();
