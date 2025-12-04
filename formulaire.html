@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="formulaire.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire</title>
+</head>
+    <body>
+        <form method="POST">
+        <label for="name">Nom :</label><br>
+        <input type="text" id="name" name="name"><br><br>
+
+        <label for="name">Prénom</label><br>
+        <input type="text" id="name" name="name"><br><br>
+
+        <label for="email">Email :</label><br>
+        <input type="email" id="email" name="email"><br><br>
+
+        <label for="phone">Numéro de téléphone :</label><br>
+        <!-- <input type="tel" id="phone" name="phone" required><br><br> -->
+
+        <div class="phone-group">
+            <script>
+                function genererNombre(idInput) {
+                    let nombre = Math.floor(Math.random() * 100);  // entre 0 et 99
+                    let format = nombre.toString().padStart(2, "0"); // format "00", "01", ..., "99"
+
+                    document.getElementById(idInput).value = format;
+                }
+            </script>
+
+            <div class="bouton_roue">
+                <input type="text" maxlength="2" pattern="^0[0-9]" required id="case1">
+                <button onclick="genererNombre('case1')">Tourner !</button>
+            </div>
+
+            <div class="bouton_roue">
+                <input type="text" maxlength="2" pattern="[0-9]{2}" required id="case2">
+                <button onclick="genererNombre('case2')">Tourner !</button>
+            </div>
+            
+            <div class="bouton_roue">
+                <input type="text" maxlength="2" pattern="[0-9]{2}" required id="case3">
+                <button onclick="genererNombre('case3')">Tourner !</button>
+            </div>
+            <div class="bouton_roue">
+                <input type="text" maxlength="2" pattern="[0-9]{2}" required id="case4">
+                <button onclick="genererNombre('case4')">Tourner !</button>
+            </div>
+            <div class="bouton_roue">
+                <input type="text" maxlength="2" pattern="[0-9]{2}" required id="case5">
+                <button onclick="genererNombre('case5')">Tourner !</button>
+            </div>
+        </div>
+
+        <br><br>
+        <button type="submit">Envoyer</button>
+    </form>
+
+    </body>
+</html>
