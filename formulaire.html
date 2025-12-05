@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="formulaire.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire</title>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="formulaire.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Formulaire</title>
+    </head>
     <body>
+        <audio id="spin-sound" src="resources/xylobone.ogg" preload="auto"></audio>
+        <a href="index.html" id="back_button"><button><-retour</button></a>
         <form>
-        <label for="name">Nom :</label><br>
-        <input type="text" id="name" name="name"><br><br>
+        <h1>Formulaire de contact</h1>
+        <div class="base_form">
+            <label for="name" class="">Nom :</label><br>
+            <input type="text" id="name" name="name"><br><br>
 
-        <label for="name">Prénom</label><br>
-        <input type="text" id="name" name="name"><br><br>
+            <label for="name">Prénom</label><br>
+            <input type="text" id="name" name="name"><br><br>
 
-        <label for="email">Email :</label><br>
-        <input type="email" id="email" name="email"><br><br>
-
+            <label for="email">Email :</label><br>
+            <input type="email" id="email" name="email"><br><br>
+        </div>
         <label for="phone">Numéro de téléphone :</label><br>
         <!-- <input type="tel" id="phone" name="phone" required><br><br> -->
         
@@ -26,18 +30,31 @@
         <div class="phone-group">
             <script>
                 function lancerRoulette(idInput) {
+                    const spinSound = document.getElementById('spin-sound');
                     const roulette = document.getElementById('roulette');
                     const case1 = document.getElementById(idInput);
+
+                    if (!spinSound) return;
+
+                    
 
                     // Génère un nombre aléatoire entre 0 et 99
                     let nombre = Math.floor(Math.random() * 100);
                     let format = nombre.toString().padStart(2, "0");
 
+                    // Joue le son de rotation
+                    spinSound.currentTime = 0;
+                    spinSound.loop = true;
+                    spinSound.play().catch(e => console.log("Erreur son rotation:", e));
+
                     // Animation de la roulette
                     roulette.style.transform = 'rotate(8640deg)'; // 4 tours complets
-
+                    
                     // Après l'animation, on affiche le nombre
                     setTimeout(() => {
+                        spinSound.pause();
+                        spinSound.currentTime = 0;
+                        spinSound.loop = false;
                         document.getElementById(idInput).value = format;
                         roulette.classList.add('no-transition');
                         roulette.style.transform = 'rotate(0deg)';
@@ -75,7 +92,8 @@
         </div>
 
         <br><br>
-        <button type="submit">Envoyer</button>
+        <button type="submit" id="submit_button">Envoyer</button>
+
     </form>
 
     </body>
