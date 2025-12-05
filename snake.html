@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Nuit de folies - Snake (Web)</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #222;
+        margin: 0;
+    }
+    canvas {
+        background: darkgray;
+        border: 2px solid darkred;
+    }
+</style>
+</head>
+<body>
+ 
+<canvas id="gameCanvas" width="625" height="625"></canvas>
+ 
+<script>
+// ----------------------------
+// CONFIG
+// ----------------------------
+const ROWS = 25;
+const COLS = 25;
+const TILE_SIZE = 25;
+ 
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+ 
+let snake = {x: 5 * TILE_SIZE, y: 5 * TILE_SIZE};
+let food = {
+    x: Math.floor(Math.random() * COLS) * TILE_SIZE,
+    y: Math.floor(Math.random() * ROWS) * TILE_SIZE
+};
+ 
+let snakeBody = [];
+let velocityX = 0;
+let velocityY = 0;
+let gameOver = false;
+let score = 0;
+ 
+// ----------------------------
+// RANDOM COLOR (same as Python)
+// ----------------------------
+function randomColor() {
+    const r = () => Math.floor(Math.random() * 256);
+    return `rgb(${r()},${r()},${r()})`;
+}
+ 
+// ----------------------------
+// INPUT HANDLING
+// ----------------------------
+document.addEventListener("keydown", (e) => {
+    if (gameOver) return;
+ 
+    if ((e.key === "z" || e.key === "ArrowUp") && velocityY !== 1) {
+        velocityX = 0; velocityY = -1;
+    }
+    else if ((e.key === "s" || e.key === "ArrowDown") && velocityY !== -1) {
+        velocityX = 0; velocityY = 1;
+    }
+    else if ((e.key === "q" || e.key === "ArrowLeft") && velocityX !== 1) {
+        velocityX = -1; velocityY = 0;
+    }
+    else if ((e.key === "d" || e.key === "ArrowRight") && velocityX !== -1) {
+        velocityX = 1; velocityY = 0;
+    }
+});
+ 
+// ----------------------------
+// UPDATE LOGIC (converted from Python)
+// ----------------------------
+function update() {
+    if (gameOver) return;
+ 
+    // Collision with walls
+    if (snake.x < 0 || snake.x >= COLS * TILE_SIZE ||
+        snake.y < 0 || snake.y >= ROWS * TILE_SIZE) {
+        gameOver = true;
+        return;
+    }
+ 
+    // Collision with body
+    for (let part of snakeBody) {
+        if (snake.x === part.x && snake.y === part.y) {
+            gameOver = true;
+            return;
+        }
+    }
+ 
+    // Eating food
+    if (snake.x === food.x && snake.y === food.y) {
+        snakeBody.push({x: food.x, y: food.y});
+        food.x = Math.floor(Math.random() * COLS) * TILE_SIZE;
+        food.y = Math.floor(Math.random() * ROWS) * TILE_SIZE;
+        score++;
+    }
+ 
+    // Move tail
+    for (let i = snakeBody.length - 1; i > 0; i--) {
+        snakeBody[i] = {...snakeBody[i - 1]};
+    }
+    if (snakeBody.length > 0) {
+        snakeBody[0] = {x: snake.x, y: snake.y};
+    }
+ 
+    snake.x += velocityX * TILE_SIZE;
+    snake.y += velocityY * TILE_SIZE;
+}
+ 
+// ----------------------------
+// DRAW (converted from Python)
+// ----------------------------
+function draw() {
+    update();
+ 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+    // Snake head
+    ctx.fillStyle = "aqua";
+    ctx.fillRect(snake.x, snake.y, TILE_SIZE, TILE_SIZE);
+ 
+    // Food
+    ctx.fillStyle = randomColor();
+    ctx.beginPath();
+    ctx.arc(food.x + TILE_SIZE/2, food.y + TILE_SIZE/2, TILE_SIZE/2, 0, Math.PI*2);
+    ctx.fill();
+ 
+    // Snake body
+    for (let part of snakeBody) {
+        ctx.fillStyle = randomColor();
+        ctx.fillRect(part.x, part.y, TILE_SIZE, TILE_SIZE);
+    }
+ 
+    // Score + Game Over message
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 10, 20);
+ 
+    if (gameOver) {
+        ctx.font = "30px Arial";
+        ctx.fillText("Rip Bozo t'as perdu !", 80, 250);
+        ctx.fillText("Score: " + score, 200, 300);
+    }
+ 
+    setTimeout(draw, 100); // same speed as Tkinter
+}
+ 
+draw();
+</script>
+ 
+</body>
+</html>
