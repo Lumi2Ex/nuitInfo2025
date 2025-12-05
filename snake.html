@@ -1,159 +1,260 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Nuit de folies - Snake (Web)</title>
+<meta charset="UTF-8" />
+<title>Snake</title>
+ 
 <style>
     body {
+        background: #fafafa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        user-select: none;
+    }
+ 
+    h1 {
+        margin-bottom: 10px;
+        color: #333;
+        font-weight: 600;
+    }
+ 
+    #game {
+        border: 2px solid #333;
+        background: #d8f3dc; /* light green, Google style */
+    }
+ 
+    #scoreboard {
+        margin-top: 8px;
+        font-size: 18px;
+        color: #333;
+    }
+ 
+    /* Optional mobile buttons */
+    #mobile-controls {
+        margin-top: 20px;
+        display: none; /* auto-shown on mobile */
+        grid-template-columns: 70px 70px 70px;
+        gap: 10px;
+    }
+    .btn {
+        background: #333;
+        color: white;
+        font-size: 26px;
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background: #222;
-        margin: 0;
     }
-    canvas {
-        background: darkgray;
-        border: 2px solid darkred;
+ 
+    @media (max-width: 768px) {
+        #mobile-controls { display: grid; }
     }
 </style>
 </head>
-<body>
  
-<canvas id="gameCanvas" width="625" height="625"></canvas>
+<body style="background-color: black;">
+ 
+<h1 style="color: whitesmoke;">Classic Snake</h1>
+<canvas id="game" width="600" height="600" style="border: solid; border-color: white;"></canvas>
+<div id="scoreboard" style="color: whitesmoke;">Score: <span id="score">0</span></div>
+ 
+<div id="mobile-controls">
+    <div></div>
+    <div class="btn" onclick="setDir(0,-1)">⬆️</div>
+    <div></div>
+    <div class="btn" onclick="setDir(-1,0)">⬅️</div>
+    <div class="btn" onclick="setDir(1,0)">➡️</div>
+    <div></div>
+    <div class="btn" onclick="setDir(0,1)">⬇️</div>
+    <div></div>
+</div>
  
 <script>
-// ----------------------------
-// CONFIG
-// ----------------------------
-const ROWS = 25;
-const COLS = 25;
-const TILE_SIZE = 25;
- 
-const canvas = document.getElementById("gameCanvas");
+// ===============================
+// CONFIGURATION
+// ===============================
+const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
  
-let snake = {x: 5 * TILE_SIZE, y: 5 * TILE_SIZE};
-let food = {
-    x: Math.floor(Math.random() * COLS) * TILE_SIZE,
-    y: Math.floor(Math.random() * ROWS) * TILE_SIZE
-};
+const TILE = 25;
+const COLS = canvas.width / TILE;
+const ROWS = canvas.height / TILE;
  
-let snakeBody = [];
-let velocityX = 0;
-let velocityY = 0;
+let snake;
+let snakeBody;
+let dir;
+let food;
+let score;
 let gameOver = false;
-let score = 0;
+let speed = 130;
  
-// ----------------------------
-// RANDOM COLOR (same as Python)
-// ----------------------------
-function randomColor() {
-    const r = () => Math.floor(Math.random() * 256);
-    return `rgb(${r()},${r()},${r()})`;
+// Colors in "Google Snake" style
+const COLOR_SNAKE = "#2d6a4f";   // green
+const COLOR_HEAD  = "#1b4332";   // dark green
+const COLOR_FOOD  = "#ff4d4d";   // red
+const GRID_COLOR  = "rgba(0,0,0,0.05)";
+ 
+// ===============================
+// INIT
+// ===============================
+function init() {
+    snake = { x: 10, y: 10 };
+    snakeBody = [];
+    dir = { x: 1, y: 0 }; // starts moving right
+    food = randomFood();
+    score = 0;
+    gameOver = false;
+    document.getElementById("score").textContent = score;
 }
  
-// ----------------------------
+function randomFood() {
+    return {
+        x: Math.floor(Math.random() * COLS),
+        y: Math.floor(Math.random() * ROWS)
+    };
+}
+ 
+// ===============================
 // INPUT HANDLING
-// ----------------------------
+// ===============================
 document.addEventListener("keydown", (e) => {
     if (gameOver) return;
  
-    if ((e.key === "z" || e.key === "ArrowUp") && velocityY !== 1) {
-        velocityX = 0; velocityY = -1;
-    }
-    else if ((e.key === "s" || e.key === "ArrowDown") && velocityY !== -1) {
-        velocityX = 0; velocityY = 1;
-    }
-    else if ((e.key === "q" || e.key === "ArrowLeft") && velocityX !== 1) {
-        velocityX = -1; velocityY = 0;
-    }
-    else if ((e.key === "d" || e.key === "ArrowRight") && velocityX !== -1) {
-        velocityX = 1; velocityY = 0;
-    }
+    if ((e.key === "ArrowUp" || e.key === "z") && dir.y !== 1)
+        dir = { x: 0, y: -1 };
+    if ((e.key === "ArrowDown" || e.key === "s") && dir.y !== -1)
+        dir = { x: 0, y: 1 };
+    if ((e.key === "ArrowLeft" || e.key === "q") && dir.x !== 1)
+        dir = { x: -1, y: 0 };
+    if ((e.key === "ArrowRight" || e.key === "d") && dir.x !== -1)
+        dir = { x: 1, y: 0 };
 });
  
-// ----------------------------
-// UPDATE LOGIC (converted from Python)
-// ----------------------------
+// Mobile button function
+function setDir(x, y) {
+    if (dir.x + x !== 0 || dir.y + y !== 0)
+        dir = { x, y };
+}
+ 
+// ===============================
+// UPDATE
+// ===============================
 function update() {
     if (gameOver) return;
  
-    // Collision with walls
-    if (snake.x < 0 || snake.x >= COLS * TILE_SIZE ||
-        snake.y < 0 || snake.y >= ROWS * TILE_SIZE) {
+    // Move body
+    snakeBody.unshift({ x: snake.x, y: snake.y });
+    snakeBody.pop();
+ 
+    // Move head
+    snake.x += dir.x;
+    snake.y += dir.y;
+ 
+    // Wall collision
+    if (
+        snake.x < 0 || snake.x >= COLS ||
+        snake.y < 0 || snake.y >= ROWS
+    ) {
         gameOver = true;
         return;
     }
  
-    // Collision with body
-    for (let part of snakeBody) {
-        if (snake.x === part.x && snake.y === part.y) {
+    // Body collision
+    for (let part of snakeBody)
+        if (snake.x === part.x && snake.y === part.y)
             gameOver = true;
-            return;
-        }
-    }
  
-    // Eating food
+    if (gameOver) return;
+ 
+    // Eat food
     if (snake.x === food.x && snake.y === food.y) {
-        snakeBody.push({x: food.x, y: food.y});
-        food.x = Math.floor(Math.random() * COLS) * TILE_SIZE;
-        food.y = Math.floor(Math.random() * ROWS) * TILE_SIZE;
+        snakeBody.push({ ...snake });
+        food = randomFood();
         score++;
+        document.getElementById("score").textContent = score;
     }
- 
-    // Move tail
-    for (let i = snakeBody.length - 1; i > 0; i--) {
-        snakeBody[i] = {...snakeBody[i - 1]};
-    }
-    if (snakeBody.length > 0) {
-        snakeBody[0] = {x: snake.x, y: snake.y};
-    }
- 
-    snake.x += velocityX * TILE_SIZE;
-    snake.y += velocityY * TILE_SIZE;
 }
  
-// ----------------------------
-// DRAW (converted from Python)
-// ----------------------------
-function draw() {
-    update();
+// ===============================
+// DRAW
+// ===============================
+function drawGrid() {
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.lineWidth = 1;
  
+    for (let i = 0; i < COLS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * TILE, 0);
+        ctx.lineTo(i * TILE, canvas.height);
+        ctx.stroke();
+    }
+ 
+    for (let j = 0; j < ROWS; j++) {
+        ctx.beginPath();
+        ctx.moveTo(0, j * TILE);
+        ctx.lineTo(canvas.width, j * TILE);
+        ctx.stroke();
+    }
+}
+ 
+function drawFood() {
+    ctx.fillStyle = COLOR_FOOD;
+    ctx.fillRect(food.x * TILE, food.y * TILE, TILE, TILE);
+}
+ 
+function drawSnake() {
+    // body
+    ctx.fillStyle = COLOR_SNAKE;
+    for (let part of snakeBody) {
+        ctx.fillRect(part.x * TILE, part.y * TILE, TILE, TILE);
+    }
+ 
+    // head
+    ctx.fillStyle = COLOR_HEAD;
+    ctx.fillRect(snake.x * TILE, snake.y * TILE, TILE, TILE);
+}
+ 
+function drawGameOver() {
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+ 
+    ctx.fillStyle = "white";
+    ctx.font = "40px Arial";
+    ctx.fillText("RIP BOZO", 200, 280);
+ 
+    ctx.font = "20px Arial";
+    ctx.fillText("Press F5 to restart", 215, 320);
+}
+ 
+function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
  
-    // Snake head
-    ctx.fillStyle = "aqua";
-    ctx.fillRect(snake.x, snake.y, TILE_SIZE, TILE_SIZE);
+    drawGrid();
+    drawFood();
+    drawSnake();
  
-    // Food
-    ctx.fillStyle = randomColor();
-    ctx.beginPath();
-    ctx.arc(food.x + TILE_SIZE/2, food.y + TILE_SIZE/2, TILE_SIZE/2, 0, Math.PI*2);
-    ctx.fill();
- 
-    // Snake body
-    for (let part of snakeBody) {
-        ctx.fillStyle = randomColor();
-        ctx.fillRect(part.x, part.y, TILE_SIZE, TILE_SIZE);
-    }
- 
-    // Score + Game Over message
-    ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, 10, 20);
- 
-    if (gameOver) {
-        ctx.font = "30px Arial";
-        ctx.fillText("Rip Bozo t'as perdu !", 80, 250);
-        ctx.fillText("Score: " + score, 200, 300);
-    }
- 
-    setTimeout(draw, 100); // same speed as Tkinter
+    if (gameOver) drawGameOver();
 }
  
-draw();
-</script>
+// ===============================
+// LOOP
+// ===============================
+function loop() {
+    update();
+    draw();
+    setTimeout(loop, speed);
+}
  
+init();
+loop();
+</script>
+
+<a href="index.html" id="back_button"><button><-retour</button></a>
 </body>
 </html>
