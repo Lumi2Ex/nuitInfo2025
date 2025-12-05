@@ -1,6 +1,27 @@
 body {
     color: white;
     background-color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+
+}
+
+form {
+    background-color: rgb(22, 22, 22);
+    border-radius: 15px;
+    padding: 20px;
+    border: solid;
+}
+
+.base_form input{
+    width: 60%;
+}
+
+.phone-group button {
+    font-size: medium;
 
 }
 
@@ -9,26 +30,35 @@ body {
     flex-flow: nowrap, row;
 }
 
+.phone-group button {
+    display: flex;
+}
+
+
 .bouton_roue{
     display: flex;
     flex-direction: column;
+    align-items: center;
 
 }
 
 .roulette-container {
-    width: 100px;
-    height: 100px;
+    width: 200px;
+    height: 200px;
     margin: 0 auto;
     position: relative;
-    border: 2px solid #333;
+    border: 2px solid #ffffff;
     border-radius: 50%;
     overflow: hidden;
+    margin-bottom: 40px;
+    margin-top: 40px;
 }
 
 .roulette {
     width: 100%;
     height: 100%;
     position: relative;
+
     background: conic-gradient(
         #ff0000 0% 10%,
         #00ff00 10% 20%,
@@ -46,4 +76,16 @@ body {
 
 .roulette.no-transition {
     transition: none;
+}
+
+#submit_button {
+    font-size: large;
+    width: 100px;
+    height: 35px;
+}
+
+#back_button {
+    position: relative;
+    left: -400px;
+    top: 40px;
 }
